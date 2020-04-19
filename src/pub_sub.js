@@ -1,15 +1,11 @@
 /*!
 * Pub/Sub implementation
-* http://addyosmani.com/
-* Licensed under the GPL
-* http://jsfiddle.net/LxPrq/
 */
 
 
 
 var PubSubManager = new (function() {
     var topics = {};
-    var subUid = -1;
   
     this.publish = function(topic, message) {
         if (!topics[topic]) {

@@ -11,7 +11,6 @@ if (!isMainThread) {
     let tradeData = {};
 
     parentPort.on('message', (trade) => {
-        console.log("in fsm....");
         if(typeof trade === "object") {
             const checkBarNum = (seconds) => {
                 let bar = 1;
@@ -55,7 +54,6 @@ const setTradeData = (trade, bar_num, tradeData) => {
             volume: !volume ? trade.Q : volume
         }
         tradeData[symbol].push(pushData);
-        console.log(pushData);
         webSocketWorker.postMessage(pushData); 
     }
     
@@ -74,9 +72,7 @@ const setTradeData = (trade, bar_num, tradeData) => {
                 c: trade.P,
                 volume: (trade.Q + latestTrade.volume)
             }
-            console.log(pushData);
             webSocketWorker.postMessage(pushData); 
-
             tradeData[trade.sym].push(pushData);
         } else {
             setNewTrade(bar_num, trade.Q);
