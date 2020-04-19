@@ -1,13 +1,17 @@
-const { isMainThread, parentPort } = require('worker_threads');
+const { isMainThread, parentPort, Worker } = require('worker_threads');
 const fs = require('fs');
 
 const current_dirname = __dirname;
 const fileToWrite = current_dirname + '/../dataset/subscribe.json';
 
+const webSocketWorker = new Worker('./worker/websocket.js');
+
 
 if (!isMainThread) {
     let tradeData = {};
+
     parentPort.on('message', (trade) => {
+        console.log("in fsm....");
         if(typeof trade === "object") {
             const checkBarNum = (seconds) => {
                 let bar = 1;
@@ -25,6 +29,7 @@ if (!isMainThread) {
             let currentBar = checkBarNum(trade.TS2);
             setTradeData(trade, currentBar, tradeData);
             fs.writeFileSync(fileToWrite, JSON.stringify(tradeData, null,'\t'));
+
         } else {
             fs.writeFileSync(fileToWrite, JSON.stringify(tradeData[trade], null,'\t'));
             parentPort.postMessage(JSON.stringify(tradeData[trade]));
@@ -51,6 +56,7 @@ const setTradeData = (trade, bar_num, tradeData) => {
         }
         tradeData[symbol].push(pushData);
         console.log(pushData);
+        webSocketWorker.postMessage(pushData); 
     }
     
     if(trade.sym in tradeData) {
@@ -69,6 +75,8 @@ const setTradeData = (trade, bar_num, tradeData) => {
                 volume: (trade.Q + latestTrade.volume)
             }
             console.log(pushData);
+            webSocketWorker.postMessage(pushData); 
+
             tradeData[trade.sym].push(pushData);
         } else {
             setNewTrade(bar_num, trade.Q);

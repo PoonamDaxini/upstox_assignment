@@ -5,8 +5,8 @@ let symbolStartTime = {};
 if (isMainThread) {
     // module.exports = async function 
     const current_dirname = __dirname;
-    // const fileToRead = current_dirname + '/dataset/trades.json';
-    const fileToRead = current_dirname + '/dataset/test.json';
+    const fileToRead = current_dirname + '/dataset/trades.json';
+    // const fileToRead = current_dirname + '/dataset/test.json';
 
     const readWorker = new Worker('./worker/reader.js',{
         workerData : fileToRead
@@ -25,9 +25,8 @@ if (isMainThread) {
         }
 
         message.startTime = symbolStartTime[message.sym];
-        
-        fsmWorker.postMessage(message);
 
+        fsmWorker.postMessage(message);    
     });
 
     readWorker.on('error', (error) => {
@@ -41,6 +40,7 @@ if (isMainThread) {
         console.log("read worker exists");
     });
 
+    
 }else{
     console.log(isMainThread);
 } 

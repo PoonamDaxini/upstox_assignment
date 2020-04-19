@@ -1,15 +1,30 @@
-const WebSocket = require('ws');
+const WebSocketServer = require('ws').Server;
 
-const ws = new WebSocket('ws://localhost:8080/');
-//     const ws = new WebSocket.Server({
-//     port: 8080
-// });
+const PubSubManager = require('./pub_sub');
 
-ws.on('open', function open() {
-    ws.send('something');
-});
+const wss = new WebSocketServer({ port : 3001 });
 
-ws.on('message', function incoming(data) {
-    console.log(data);
+wss.on('connection', (ws, req) => {
+    console.log(`Connection request from: ${req.connection.remoteAddress}`);
+
+    ws.on('message', (data) => {
+        const json = JSON.parse(data);
+        const request = json.request;
+        const message = json.message;
+        const channel = json.channel;
+
+        switch (request) {
+            case 'PUBLISH':
+                PubSubManager.publish(channel, message);
+                break;
+            case 'SUBSCRIBE':
+                PubSubManager.subscribe(channel,ws);
+                break;
+        }
+    });
+
+    ws.on('close', () => {
+        console.log('Stopping client connection.');
+    });
 });
 

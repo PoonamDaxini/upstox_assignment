@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+		<!-- Bootstrap -->
+	<link rel="stylesheet" href="./bootstrap.min.css">
+		
+		<!-- jQuery -->
+	<script src="./jquery-2.1.1.min.js" type="text/javascript"></script>
+	
+<script type="text/javascript">
+$( document ).ready(function() {
+	var dataPoints = [];
+
+	var chart = new CanvasJS.Chart("chartContainer", {
+		animationEnabled: true,
+		theme: "light2", // "light1", "light2", "dark1", "dark2"
+		exportEnabled: true,
+		
+		axisX: {
+			// interval: 1
+		},
+		axisY: {
+			includeZero: false,
+			prefix: "$",
+			title: "Price"
+		},
+		toolTip: {
+			enabled: true,       //disable here
+        	animationEnabled: true,
+			content: "bar_num: {x}<br /><strong>Price:</strong><br />Open: {y[0]}, Close: {y[3]}<br />High: {y[1]}, Low: {y[2]}"
+		},
+		data: [{
+			type: "candlestick",
+			yValueFormatString: "$##0.00",
+			dataPoints: dataPoints
+		}]
+	});
+
+	$("#subscribe").on('click', function subscribe() {
+		let message = document.getElementById('message');
+		let channel = document.getElementById('channel').value;
+		let ws = new WebSocket('ws://localhost:3001');
+		ws.onopen = function () {
+			ws.send(JSON.stringify({
+				request: 'SUBSCRIBE',
+				message: '',
+				channel: channel
+			}));
+					
+			ws.onmessage = function(event){
+				data = JSON.parse(event.data);
+				message.innerHTML = data.message;
+				const c = JSON.parse(data.message);
+				dataPoints.push({
+					x: c.bar_num,
+					y: [
+						parseFloat(c.o),
+						parseFloat(c.c),
+						parseFloat(c.h),
+						parseFloat(c.l)
+					]
+				});
+					
+				chart.render();
+			};
+
+				
+		};
+	});
+});
+</script>
+<script type="text/javascript" src="./canvas.js"></script>
+</head>
+<body>
+	<input type="text" id="channel" placeholder="Symbol (XETHZUSD, XXBTZUSD etc.)" />
+    <button  id="subscribe">Subscribe</button>
+    
+	<div>
+			<h1>Message:</h1>
+			<div id="message"></div>
+		</div>
+	<div id="chartContainer" style="height: 300px; width: 100%;">
+
+</div>
+</body>
+</html>
