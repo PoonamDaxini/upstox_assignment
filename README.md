@@ -18,3 +18,7 @@ It computes trade data as per symbol and TS2 from passed json data in 15 seconds
 Each computted data is then written in file `/dataset/subscribe.json`
 Computted data is also sent to websocket to publish it to respective subscribers 
 
+# TO DO
+1. Add prevention for publishing data. Only websocket or server can publish data, no other subsscriber can publish data
+2. Configure settings so that trade computation works for different interval such as `1m`, `15m` etc also works
+
